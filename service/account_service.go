@@ -22,6 +22,10 @@ func (srv *AccountService) Put(username string) (float32, error) {
 	return srv.repository.Put(username, srv.initialBalanceAmount)
 }
 
+func (srv *AccountService) Accounts() []*account.Account {
+	return srv.repository.Accounts()
+}
+
 func NewAccountService(initBalance, minBalance float32, repository account.IAccountRepository) *AccountService {
 	return &AccountService{
 		initialBalanceAmount: initBalance,

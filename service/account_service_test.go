@@ -22,7 +22,7 @@ func TestGetAccount(t *testing.T) {
 
 	repository.EXPECT().
 		AccountOf(username).
-		Return(&account.Account{Username: username, Balance: float32(customBalance)}).
+		Return(testAccount(username, customBalance)).
 		Times(1)
 
 	service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
@@ -62,7 +62,7 @@ func TestPutAccount(t *testing.T) {
 		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
 		repository.EXPECT().
 			AccountOf(username).
-			Return(&account.Account{Username: username, Balance: customBalance}).
+			Return(testAccount(username, customBalance)).
 			Times(1)
 		repository.EXPECT().
 			Put(username, INIT_BALANCE).
@@ -76,4 +76,29 @@ func TestPutAccount(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, customBalance, initBalance)
 	})
+}
+
+func TestGetAccounts(t *testing.T) {
+	mockReturnAccounts := []*account.Account{
+		testAccount("user1", 100),
+		testAccount("user2", -50),
+		testAccount("user3", 70),
+		testAccount("user4", 23.05),
+	}
+
+	repository := mock.NewMockIAccountRepository(gomock.NewController(t))
+	repository.EXPECT().
+		Accounts().
+		Return(mockReturnAccounts).
+		Times(1)
+
+	service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
+
+	result := service.Accounts()
+
+	assert.Equal(t, mockReturnAccounts, result)
+}
+
+func testAccount(username string, balance float32) *account.Account {
+	return &account.Account{Username: username, Balance: balance}
 }
