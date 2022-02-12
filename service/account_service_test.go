@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"my_account/account"
 	"my_account/mock"
 	"testing"
@@ -97,6 +98,105 @@ func TestGetAccounts(t *testing.T) {
 	result := service.Accounts()
 
 	assert.Equal(t, mockReturnAccounts, result)
+}
+
+func TestUpdateBalance(t *testing.T) {
+	t.Run("Update balance of unexisting user", func(t *testing.T) {
+		username := "orhan"
+
+		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
+		repository.EXPECT().
+			AccountOf(username).
+			Return(nil).
+			Times(1)
+
+		service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
+
+		newBalance, availableLimit, err := service.UpdateBalance(username, 50)
+
+		assert.Equal(t, fmt.Errorf("'%s' not found", username), err)
+		assert.Equal(t, float32(0), newBalance)
+		assert.Equal(t, float32(0), availableLimit)
+
+	})
+
+	t.Run("Update balance with positive amount", func(t *testing.T) {
+		username := "orhan"
+		currentBalance := float32(20)
+		newAmont := float32(50)
+
+		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
+		repository.EXPECT().
+			AccountOf(username).
+			Return(testAccount(username, currentBalance)).
+			Times(1)
+
+		repository.EXPECT().
+			UpdateBalance(username, currentBalance+newAmont).
+			Return(currentBalance+newAmont, nil).
+			Times(1)
+
+		service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
+
+		newBalance, availableLimit, err := service.UpdateBalance(username, newAmont)
+
+		assert.Nil(t, err)
+		assert.Equal(t, float32(70), newBalance)
+		assert.Equal(t, float32(170), availableLimit)
+
+	})
+
+	t.Run("Update balance with negative amount which does not exceed min amount", func(t *testing.T) {
+		username := "orhan"
+		currentBalance := float32(20)
+		newAmont := float32(-50)
+
+		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
+		repository.EXPECT().
+			AccountOf(username).
+			Return(testAccount(username, currentBalance)).
+			Times(1)
+
+		repository.EXPECT().
+			UpdateBalance(username, currentBalance+newAmont).
+			Return(currentBalance+newAmont, nil).
+			Times(1)
+
+		service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
+
+		newBalance, availableLimit, err := service.UpdateBalance(username, newAmont)
+
+		assert.Nil(t, err)
+		assert.Equal(t, float32(-30), newBalance)
+		assert.Equal(t, float32(70), availableLimit)
+
+	})
+
+	t.Run("Update balance with negative amount which exceeds min amount", func(t *testing.T) {
+		username := "orhan"
+		currentBalance := float32(20)
+		newAmont := float32(-130)
+
+		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
+		repository.EXPECT().
+			AccountOf(username).
+			Return(testAccount(username, currentBalance)).
+			Times(1)
+
+		repository.EXPECT().
+			UpdateBalance(username, currentBalance+newAmont).
+			Return(currentBalance+newAmont, nil).
+			Times(0)
+
+		service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
+
+		newBalance, availableLimit, err := service.UpdateBalance(username, newAmont)
+
+		assert.Equal(t, fmt.Errorf("no sufficient balance"), err)
+		assert.Equal(t, float32(20), newBalance)
+		assert.Equal(t, float32(120), availableLimit)
+
+	})
 }
 
 func testAccount(username string, balance float32) *account.Account {

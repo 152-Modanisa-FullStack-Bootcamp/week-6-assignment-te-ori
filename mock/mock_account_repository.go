@@ -172,13 +172,12 @@ func (mr *MockIAccountRepositoryMockRecorder) Put(username, initBalance interfac
 }
 
 // UpdateBalance mocks base method.
-func (m *MockIAccountRepository) UpdateBalance(username string, amount float32) (float32, float32, error) {
+func (m *MockIAccountRepository) UpdateBalance(username string, amount float32) (float32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBalance", username, amount)
 	ret0, _ := ret[0].(float32)
-	ret1, _ := ret[1].(float32)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateBalance indicates an expected call of UpdateBalance.
