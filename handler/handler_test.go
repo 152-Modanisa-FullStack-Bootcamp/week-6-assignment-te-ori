@@ -231,5 +231,39 @@ func TestUpdateBalance(t *testing.T) {
 }
 
 func TestUnsupportedMethods(t *testing.T) {
+	t.Run("post to index", func(t *testing.T) {
+		service := mock.NewMockIAccountService(gomock.NewController(t))
+		handler := NewAccountHandler(service)
 
+		r := httptest.NewRequest(http.MethodPost, "/", nil)
+		w := httptest.NewRecorder()
+
+		handler.ServeHTTP(w, r)
+
+		assert.Equal(t, http.StatusMethodNotAllowed, w.Result().StatusCode)
+	})
+
+	t.Run("page not found", func(t *testing.T) {
+		service := mock.NewMockIAccountService(gomock.NewController(t))
+		handler := NewAccountHandler(service)
+
+		r := httptest.NewRequest(http.MethodPost, "/test/ere", nil)
+		w := httptest.NewRecorder()
+
+		handler.ServeHTTP(w, r)
+
+		assert.Equal(t, http.StatusNotFound, w.Result().StatusCode)
+	})
+
+	t.Run("delete to user", func(t *testing.T) {
+		service := mock.NewMockIAccountService(gomock.NewController(t))
+		handler := NewAccountHandler(service)
+
+		r := httptest.NewRequest(http.MethodDelete, "/test", nil)
+		w := httptest.NewRecorder()
+
+		handler.ServeHTTP(w, r)
+
+		assert.Equal(t, http.StatusMethodNotAllowed, w.Result().StatusCode)
+	})
 }

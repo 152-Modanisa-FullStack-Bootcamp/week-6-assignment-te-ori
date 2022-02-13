@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"my_account/account"
 	"net/http"
+	"strings"
 )
-
-// type routeTable map[int]map[string]func(http.ResponseWriter, *http.Request)
 
 type AccountHandler struct {
 	service account.IAccountService
@@ -105,29 +104,39 @@ func (hnd *AccountHandler) accounts(w http.ResponseWriter) {
 }
 
 func (hnd *AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" && r.Method == http.MethodGet {
-		hnd.accounts(w)
-	} else if r.URL.Path != "" {
-		username := r.URL.Path[1:]
+	if r.URL.Path == "/" {
 		if r.Method == http.MethodGet {
-			hnd.accountOf(w, username)
-		} else if r.Method == http.MethodPut {
-			hnd.put(w, username)
-		} else if r.Method == http.MethodPost {
-			var req updateBalanceRequest
-			dec := json.NewDecoder(r.Body)
-
-			err := dec.Decode(&req)
-
-			if err != nil {
-				internalServerError(w, err)
-				return
-			}
-
-			hnd.updateBalance(w, username, req.Balance)
+			hnd.accounts(w)
 		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			methodNotAllowed(w)
 		}
+
+		return
+	}
+
+	path := r.URL.Path[1:]
+
+	if path == "" || strings.Contains(path, "/") {
+		pageNotFount(w)
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		hnd.accountOf(w, path)
+	} else if r.Method == http.MethodPut {
+		hnd.put(w, path)
+	} else if r.Method == http.MethodPost {
+		var req updateBalanceRequest
+		dec := json.NewDecoder(r.Body)
+
+		err := dec.Decode(&req)
+
+		if err != nil {
+			internalServerError(w, err)
+			return
+		}
+
+		hnd.updateBalance(w, path, req.Balance)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -140,6 +149,14 @@ func NewAccountHandler(service account.IAccountService) *AccountHandler {
 func internalServerError(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(err.Error()))
+}
+
+func methodNotAllowed(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+func pageNotFount(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func jsonResponse(w http.ResponseWriter, resp []byte) {
