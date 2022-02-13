@@ -78,11 +78,13 @@ func (mr *MockIAccountServiceMockRecorder) Put(username interface{}) *gomock.Cal
 }
 
 // UpdateBalance mocks base method.
-func (m *MockIAccountService) UpdateBalance(username string, amount float32) error {
+func (m *MockIAccountService) UpdateBalance(username string, amount float32) (float32, float32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBalance", username, amount)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(float32)
+	ret1, _ := ret[1].(float32)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // UpdateBalance indicates an expected call of UpdateBalance.
