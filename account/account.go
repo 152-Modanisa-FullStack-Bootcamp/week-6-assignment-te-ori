@@ -17,5 +17,5 @@ type IAccountRepository interface {
 	Accounts() []*Account
 	Put(username string, initBalance float32) (float32, error)
 	UpdateBalance(username string, amount float32) (newBalance float32, err error)
-	Count() int32
+	Count() int
 }

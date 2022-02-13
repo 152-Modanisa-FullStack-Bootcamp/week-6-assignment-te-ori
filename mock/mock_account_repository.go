@@ -143,10 +143,10 @@ func (mr *MockIAccountRepositoryMockRecorder) Accounts() *gomock.Call {
 }
 
 // Count mocks base method.
-func (m *MockIAccountRepository) Count() int32 {
+func (m *MockIAccountRepository) Count() int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Count")
-	ret0, _ := ret[0].(int32)
+	ret0, _ := ret[0].(int)
 	return ret0
 }
 

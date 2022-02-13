@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"my_account/account"
 	"my_account/mock"
+	"my_account/utils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -23,7 +24,7 @@ func TestGetAccount(t *testing.T) {
 
 	repository.EXPECT().
 		AccountOf(username).
-		Return(testAccount(username, customBalance)).
+		Return(utils.CreateTestAccount(username, customBalance)).
 		Times(1)
 
 	service := NewAccountService(INIT_BALANCE, MIN_AMOUNT, repository)
@@ -63,7 +64,7 @@ func TestPutAccount(t *testing.T) {
 		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
 		repository.EXPECT().
 			AccountOf(username).
-			Return(testAccount(username, customBalance)).
+			Return(utils.CreateTestAccount(username, customBalance)).
 			Times(1)
 		repository.EXPECT().
 			Put(username, INIT_BALANCE).
@@ -81,10 +82,10 @@ func TestPutAccount(t *testing.T) {
 
 func TestGetAccounts(t *testing.T) {
 	mockReturnAccounts := []*account.Account{
-		testAccount("user1", 100),
-		testAccount("user2", -50),
-		testAccount("user3", 70),
-		testAccount("user4", 23.05),
+		utils.CreateTestAccount("user1", 100),
+		utils.CreateTestAccount("user2", -50),
+		utils.CreateTestAccount("user3", 70),
+		utils.CreateTestAccount("user4", 23.05),
 	}
 
 	repository := mock.NewMockIAccountRepository(gomock.NewController(t))
@@ -128,7 +129,7 @@ func TestUpdateBalance(t *testing.T) {
 		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
 		repository.EXPECT().
 			AccountOf(username).
-			Return(testAccount(username, currentBalance)).
+			Return(utils.CreateTestAccount(username, currentBalance)).
 			Times(1)
 
 		repository.EXPECT().
@@ -154,7 +155,7 @@ func TestUpdateBalance(t *testing.T) {
 		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
 		repository.EXPECT().
 			AccountOf(username).
-			Return(testAccount(username, currentBalance)).
+			Return(utils.CreateTestAccount(username, currentBalance)).
 			Times(1)
 
 		repository.EXPECT().
@@ -180,7 +181,7 @@ func TestUpdateBalance(t *testing.T) {
 		repository := mock.NewMockIAccountRepository(gomock.NewController(t))
 		repository.EXPECT().
 			AccountOf(username).
-			Return(testAccount(username, currentBalance)).
+			Return(utils.CreateTestAccount(username, currentBalance)).
 			Times(1)
 
 		repository.EXPECT().
@@ -197,8 +198,4 @@ func TestUpdateBalance(t *testing.T) {
 		assert.Equal(t, float32(120), availableLimit)
 
 	})
-}
-
-func testAccount(username string, balance float32) *account.Account {
-	return &account.Account{Username: username, Balance: balance}
 }
